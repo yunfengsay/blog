@@ -1,1 +1,159 @@
-你终有一天会死去
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生命计时</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            font-family: "Ma Shan Zheng", "STXingkai", serif;
+            overflow: hidden;
+        }
+
+        .text-wrapper {
+            position: relative;
+            margin-bottom: 4rem;
+        }
+
+        .main-text {
+            font-size: 2.5rem;
+            letter-spacing: 0.2em;
+            position: relative;
+        }
+
+        .text-base {
+            color: white;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        .text-shine {
+            position: absolute;
+            top: 0;
+            left: 0;
+            color: white;
+            -webkit-clip-path: polygon(0 0, 0 100%, 0 100%, 0 0);
+            clip-path: polygon(0 0, 0 100%, 0 100%, 0 0);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% {
+                -webkit-clip-path: polygon(-20% 0, -15% 100%, -10% 100%, -15% 0);
+                clip-path: polygon(-20% 0, -15% 100%, -10% 100%, -15% 0);
+            }
+            100% {
+                -webkit-clip-path: polygon(120% 0, 115% 100%, 110% 100%, 115% 0);
+                clip-path: polygon(120% 0, 115% 100%, 110% 100%, 115% 0);
+            }
+        }
+
+        .dots-outer-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .dots-container {
+            display: flex;
+            flex-wrap: wrap;
+            width: 600px;
+            gap: 8px;
+            padding: 20px;
+            justify-content: flex-start;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .dot.past {
+            background-color: rgba(255, 182, 193, 0.7);
+            box-shadow: 0 0 5px rgba(255, 182, 193, 0.5);
+        }
+
+        .dot.future {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .dot:hover {
+            transform: scale(1.2);
+        }
+
+        .tooltip {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+
+        .dot:hover .tooltip {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="text-wrapper">
+        <div class="main-text text-base">你终有一天会死去</div>
+        <div class="main-text text-shine">你终有一天会死去</div>
+    </div>
+    <div class="dots-outer-container">
+        <div class="dots-container" id="dotsContainer"></div>
+    </div>
+
+    <script>
+        function createDots() {
+            const container = document.getElementById('dotsContainer');
+            const startYear = 1992;
+            const totalYears = 100;
+            const currentYear = new Date().getFullYear();
+
+            for (let i = 0; i < totalYears; i++) {
+                const year = startYear + i;
+                const dot = document.createElement('div');
+                dot.className = 'dot';
+                
+                const tooltip = document.createElement('div');
+                tooltip.className = 'tooltip';
+                tooltip.textContent = `${year}年`;
+                dot.appendChild(tooltip);
+                
+                if (year <= currentYear) {
+                    dot.classList.add('past');
+                    tooltip.textContent += ' (已逝)';
+                } else {
+                    dot.classList.add('future');
+                    tooltip.textContent += ' (未至)';
+                }
+                
+                container.appendChild(dot);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', createDots);
+    </script>
+</body>
+</html>
