@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt字符转义工具</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #34495e;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+            font-family: 'Consolas', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        textarea:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+        }
+        
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        button.secondary {
+            background-color: #95a5a6;
+        }
+        
+        button.secondary:hover {
+            background-color: #7f8c8d;
+        }
+        
+        .output-container {
+            position: relative;
+        }
+        
+        .copy-button {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: rgba(255, 255, 255, 0.8);
+            color: #333;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+        
+        .copy-button:hover {
+            background-color: #fff;
+            border-color: #bbb;
+        }
+        
+        .options {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            border: 1px solid #eee;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            margin-right: 20px;
+        }
+        
+        .checkbox-item input {
+            margin-right: 8px;
+        }
+        
+        .alert {
+            padding: 12px 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .character-count {
+            color: #666;
+            font-size: 14px;
+            margin-top: 5px;
+            text-align: right;
+        }
+        
+        .tab-container {
+            margin-bottom: 20px;
+        }
+        
+        .tab-buttons {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab-button {
+            padding: 10px 20px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 4px 4px 0 0;
+            margin-right: 5px;
+            cursor: pointer;
+        }
+        
+        .tab-button.active {
+            background-color: #fff;
+            border-bottom: 1px solid #fff;
+            margin-bottom: -1px;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Prompt字符转义工具</h1>
+        
+        <div class="alert alert-success" id="success-alert">复制成功！</div>
+        <div class="alert alert-info" id="info-alert">转义完成</div>
+        
+        <div class="tab-container">
+            <div class="tab-buttons">
+                <div class="tab-button active" data-tab="basic">基本转义</div>
+                <div class="tab-button" data-tab="advanced">高级设置</div>
+                <div class="tab-button" data-tab="help">使用帮助</div>
+            </div>
+            
+            <div class="tab-content active" id="basic-tab">
+                <div class="form-group">
+                    <label for="input-text">输入需要转义的文本:</label>
+                    <textarea id="input-text" placeholder="在这里输入包含特殊字符如反引号(`)的文本..."></textarea>
+                    <div class="character-count" id="input-count">字符数: 0</div>
+                </div>
+                
+                <div class="options">
+                    <label>转义选项:</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="escape-backtick" checked>
+                            <label for="escape-backtick">反引号 (`)</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="escape-backslash" checked>
+                            <label for="escape-backslash">反斜杠 (\)</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="escape-dollar">
+                            <label for="escape-dollar">美元符号 ($)</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="escape-newline">
+                            <label for="escape-newline">换行符 (\n)</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="button-group">
+                    <button id="escape-button">转义处理</button>
+                    <button id="clear-button" class="secondary">清空所有</button>
+                </div>
+                
+                <div class="form-group output-container">
+                    <label for="output-text">转义后的文本:</label>
+                    <textarea id="output-text" readonly></textarea>
+                    <button class="copy-button" id="copy-button">复制</button>
+                    <div class="character-count" id="output-count">字符数: 0</div>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="advanced-tab">
+                <h3>高级转义设置</h3>
+                <p>在这里可以设置更多自定义的转义规则</p>
+                
+                <div class="form-group">
+                    <label for="custom-rules">自定义转义规则 (每行一个，格式为"原字符:转义后字符"):</label>
+                    <textarea id="custom-rules" placeholder="例如:
+/:\/
+*:\*
+_:\_"></textarea>
+                </div>
+                
+                <div class="checkbox-item">
+                    <input type="checkbox" id="apply-custom-rules">
+                    <label for="apply-custom-rules">应用自定义规则</label>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="help-tab">
+                <h3>使用帮助</h3>
+                <p>这个工具可以帮助你转义文本中的特殊字符，特别是在处理Prompt时经常需要转义的字符。</p>
+                
+                <h4>常见用途:</h4>
+                <ul>
+                    <li>转义AI prompt中的特殊字符</li>
+                    <li>为代码中的字符串添加适当的转义</li>
+                    <li>准备正则表达式中需要转义的字符</li>
+                </ul>
+                
+                <h4>基本使用步骤:</h4>
+                <ol>
+                    <li>将需要转义的文本粘贴到输入框</li>
+                    <li>选择需要转义的字符类型</li>
+                    <li>点击"转义处理"按钮</li>
+                    <li>使用"复制"按钮将结果复制到剪贴板</li>
+                </ol>
+                
+                <h4>支持的字符转义:</h4>
+                <ul>
+                    <li><code>`</code> (反引号) → <code>\`</code></li>
+                    <li><code>\</code> (反斜杠) → <code>\\</code></li>
+                    <li><code>$</code> (美元符号) → <code>\$</code></li>
+                    <li>换行符 → <code>\n</code></li>
+                    <li>回车符 → <code>\r</code></li>
+                    <li>制表符 → <code>\t</code></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取DOM元素
+            const inputTextarea = document.getElementById('input-text');
+            const outputTextarea = document.getElementById('output-text');
+            const escapeButton = document.getElementById('escape-button');
+            const clearButton = document.getElementById('clear-button');
+            const copyButton = document.getElementById('copy-button');
+            const successAlert = document.getElementById('success-alert');
+            const infoAlert = document.getElementById('info-alert');
+            const inputCount = document.getElementById('input-count');
+            const outputCount = document.getElementById('output-count');
+            
+            // 转义选项
+            const escapeBacktick = document.getElementById('escape-backtick');
+            const escapeBackslash = document.getElementById('escape-backslash');
+            const escapeDollar = document.getElementById('escape-dollar');
+            const escapeNewline = document.getElementById('escape-newline');
+            const applyCustomRules = document.getElementById('apply-custom-rules');
+            const customRules = document.getElementById('custom-rules');
+            
+            // 标签页功能
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            // 转义函数
+            function escapeText() {
+                let text = inputTextarea.value;
+                let escaped = text;
+                
+                // 应用基本转义
+                if (escapeBackslash.checked) {
+                    escaped = escaped.replace(/\\/g, '\\\\');
+                }
+                
+                if (escapeBacktick.checked) {
+                    escaped = escaped.replace(/`/g, '\\`');
+                }
+                
+                if (escapeDollar.checked) {
+                    escaped = escaped.replace(/\$/g, '\\$');
+                }
+                
+                if (escapeNewline.checked) {
+                    escaped = escaped.replace(/\n/g, '\\n');
+                    escaped = escaped.replace(/\r/g, '\\r');
+                    escaped = escaped.replace(/\t/g, '\\t');
+                }
+                
+                // 应用自定义规则
+                if (applyCustomRules.checked) {
+                    const rules = customRules.value.split('\n');
+                    for (const rule of rules) {
+                        if (rule.trim() && rule.includes(':')) {
+                            const [from, to] = rule.split(':');
+                            if (from && to) {
+                                const regex = new RegExp(from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+                                escaped = escaped.replace(regex, to);
+                            }
+                        }
+                    }
+                }
+                
+                outputTextarea.value = escaped;
+                
+                // 更新字符计数
+                updateCharCount();
+                
+                // 显示提示
+                showAlert(infoAlert);
+            }
+            
+            // 更新字符计数
+            function updateCharCount() {
+                inputCount.textContent = `字符数: ${inputTextarea.value.length}`;
+                outputCount.textContent = `字符数: ${outputTextarea.value.length}`;
+            }
+            
+            // 显示提示框
+            function showAlert(alert) {
+                alert.style.display = 'block';
+                setTimeout(() => {
+                    alert.style.display = 'none';
+                }, 2000);
+            }
+            
+            // 复制到剪贴板
+            function copyToClipboard() {
+                outputTextarea.select();
+                document.execCommand('copy');
+                showAlert(successAlert);
+            }
+            
+            // 清空所有内容
+            function clearAll() {
+                inputTextarea.value = '';
+                outputTextarea.value = '';
+                updateCharCount();
+            }
+            
+            // 标签页切换
+            function switchTab(event) {
+                const tabId = event.target.dataset.tab;
+                
+                // 移除所有活动类
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+                
+                // 添加活动类到当前标签
+                event.target.classList.add('active');
+                document.getElementById(`${tabId}-tab`).classList.add('active');
+            }
+            
+            // 事件监听器
+            escapeButton.addEventListener('click', escapeText);
+            clearButton.addEventListener('click', clearAll);
+            copyButton.addEventListener('click', copyToClipboard);
+            
+            // 输入文本改变时更新字符计数
+            inputTextarea.addEventListener('input', updateCharCount);
+            
+            // 标签页切换事件
+            tabButtons.forEach(button => {
+                button.addEventListener('click', switchTab);
+            });
+            
+            // 初始化字符计数
+            updateCharCount();
+        });
+    </script>
+</body>
+</html>
